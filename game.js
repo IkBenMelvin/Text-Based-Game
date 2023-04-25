@@ -192,7 +192,6 @@ function CheckInventory(playerData, currentSave) {
     if (inventory.length == 0) {
         console.log(chalk.red("You have no items"));
         inquirer.prompt([{type: 'confirm', name: "choice", message: "Return to menu?"}])
-        
         .then((answer) => {
             if (answer.choice) {
                 return GameLoop(currentSave);
@@ -201,18 +200,16 @@ function CheckInventory(playerData, currentSave) {
                 return CheckInventory(playerData, currentSave);
             }
           });
-          if (inventory.length >= 1) {
+        } else if (inventory.length >= 1) {
             inquirer.prompt([{type: 'confirm', name: "choice", message: "Return to menu?"}])
-        
-        .then((answer) => {
-            if (answer.choice) {
-                return GameLoop(currentSave);
-            }
-            else {
-                return CheckInventory(playerData, currentSave);
-            }
-          });
-          }
+            .then((answer) => {
+                if (answer.choice) {
+                    return GameLoop(currentSave);
+                }
+                else {
+                    return CheckInventory(playerData, currentSave);
+                }
+                });
 }
 
 }
