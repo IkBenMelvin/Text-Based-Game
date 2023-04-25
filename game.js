@@ -17,6 +17,21 @@ function GameLoop(currentId) {
             playerData = data["slots"][slot]["character"]
         }
     });
+    inquirer.prompt([{type: 'list', name: "choice", message: "What would you like to do?", choices: ["Battle", "Check inventory", "Check quests", "Check market"]
+    }]).then((answers) => {
+        if (answers.choice == "Battle") {
+            Battle();
+        } else if (answers.choice == "Check quests") {
+            CheckQuests();
+        } else if (answers.choice == "Check inventory") {
+            CheckInventory();
+        } else if (answers.choice == "Check market") {
+            CheckMarket();
+        }
+    }
+    )
+
+    // Ask what you would like to do
     console.log(playerData)
 }
 
