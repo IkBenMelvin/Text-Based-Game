@@ -1,13 +1,115 @@
 import inquirer from "inquirer";
 import chalk from "chalk";
 import fs from "fs";
+import { randomInt } from "crypto";
 
-function Battle(playerData) {
-    inquirer.prompt([{type: 'list', name: "choice", message: "Choose a action", choices: ["Fight", "Abilities", "Inventory", "Escape"]
+function test() {
+    inquirer.prompt([{type: 'list', name: "choice", message: "Choose a action", choices: ["Attack", "Defend", "Escape"]
     }]).then((answers) => {
-        
+        if (answers.choice == "Attack") {
+            // enemyHealth -= damage;
+            // currentHealth -= enemyDamage;
+            console.log("You attacked the enemy.")
+        }
+        if (answers.choice == "Defend") {
+            currentHealth += damage;
+        }
+        if (answers.choice == "Escape") {
+            console.log("You escaped.");
+            // break;
+        }
+        return true;
+        // nextChoice = true;
     })
 }
+async function Battle(playerData) {
+    inquirer.prompt([{type: 'list', name: "choice", message: "Choose a action", choices: ["Fight", "Abilities", "Inventory", "Escape"]
+    }]).then((answers) => {
+        if (answers.choice == "Fight") {
+            let nextChoice = true;
+            const currentLevel = 1;
+            let currentHealth = playerData["maxhealth"];
+            let enemyHealth = randomInt(currentLevel * 100, currentLevel * 200);
+            const damage = randomInt(10, 20);
+            const enemyDamage = randomInt(currentLevel * 10, currentLevel * 20);
+            console.log(chalk.red(chalk.bold("You found the hacker and you decide you want to fight him.")))
+            while (nextChoice) {
+                console.log(chalk.red(`❤️  ${currentHealth}`));
+                console.log(chalk.green(`💚 ${enemyHealth}`));
+                if (currentHealth <= 0) {
+                    console.log(chalk.red("You died."));
+                    break;
+                }
+                if (enemyHealth <= 0) {
+                    console.log("You won.");
+                    break;
+                }
+                nextChoice = false;
+                if (test()) {
+                    nextChoice = true;
+                };
+            //     await inquirer.prompt([{type: 'list', name: "choice", message: "Choose a action", choices: ["Attack", "Defend", "Escape"]
+            //     }]).then((answers) => {
+            //         if (answers.choice == "Attack") {
+            //             enemyHealth -= damage;
+            //             currentHealth -= enemyDamage;
+            //             console.log("You attacked the enemy.")
+            //         }
+            //         if (answers.choice == "Defend") {
+            //             currentHealth += damage;
+            //         }
+            //         if (answers.choice == "Escape") {
+            //             console.log("You escaped.");
+            //             // break;
+            //         }
+            //         // nextChoice = true;
+            // })
+            }
+        }
+    })
+}
+function CheckMarket(playerData){
+    inquirer.prompt([{type: 'list', name: "choice", message: "Choose a action", choices: ["Buy", "Sell", "Exit"]
+    }]).then((answers) => {
+        if (answers.choice == "Buy") {
+            inquirer.prompt([{type: 'list', name: "choice", message: "Choose a item", choices: ["Carrot", "Potato", "Sword", "Exit"]
+            }]).then((answers2) => {
+                if (answers2.choice == "Potato") {
+                    console.log("Would you like to buy a potato for 10 coins?");
+                    if (playerData["coins"] >= 10) {
+                        playerData["coins"] -= 10;
+                        playerData["inventory"].push("Potato");
+                    }
+                } else if (answers2.choice == "Carrot") {
+                    console.log("Would you like to buy a carrot for 10 coins?");
+                    inquirer.prompt([{type: 'confirm', name: "choice", message: "Would you like to buy a carrot for 10 coins?"
+                    }])
+                    .then((answers3) => {
+                        if (answers3.choice) {
+                            if (playerData["coins"] >= 10) {
+                                playerData["coins"] -= 10;
+                                playerData["inventory"].push("Carrot");
+                                console.log(playerData["inventory"])
+                            } else {
+                                console.log(chalk.red("You don't have enough coins."));
+                            }
+                        } else {
+                            console.log(chalk.red("Cancelled."));
+                        }
+                    })
+                }
+            
+            })
+        }
+    })
+}
+        // else if (answers.choice == "Sell") { 
+        // if (answers.choice == "Sell") {
+        //     console.log("Sell");
+        // }
+        // if (answers.choice == "Exit") {
+        //     console.log("Exit");   
+        // }
 
 function GenerateQuests(playerData, currentSave) {
     // Array with all sorts of quests.
@@ -51,12 +153,13 @@ function GenerateQuests(playerData, currentSave) {
           console.error(err);
         }
     });
+    return CheckQuests(playerData, currentSave);
 }
 
 
 function CheckQuests(playerData, currentSave) {
     if (playerData["quests"].length == 0) {
-        console.log(chalk.red("You have no quests"))
+        // console.log(chalk.red("You have no quests"))
         for (let i = 0; i < 5; i++) {
             GenerateQuests(playerData, currentSave);
         }
@@ -75,9 +178,43 @@ function CheckQuests(playerData, currentSave) {
             console.log(chalk.green(`${quest.name} ${quest.progress}/${quest.goal} - ${quest.reward} coins earned`))
             GenerateQuests(playerData, currentSave);
         } else {
-            console.log(`${quest.name} ${quest.progress}/${quest.goal}`)
+            console.log(chalk.yellow(`${quest.name} ${quest.progress}/${quest.goal}`))
         }
     })
+    return GameLoop(currentSave)
+}
+
+function CheckInventory(playerData, currentSave) {
+    const inventory = playerData["inventory"]
+    inventory.forEach(item => {
+        console.log(item)
+    })
+    if (inventory.length == 0) {
+        console.log(chalk.red("You have no items"));
+        inquirer.prompt([{type: 'confirm', name: "choice", message: "Return to menu?"}])
+        
+        .then((answer) => {
+            if (answer.choice) {
+                return GameLoop(currentSave);
+            }
+            else {
+                return CheckInventory(playerData, currentSave);
+            }
+          });
+          if (inventory.length >= 1) {
+            inquirer.prompt([{type: 'confirm', name: "choice", message: "Return to menu?"}])
+        
+        .then((answer) => {
+            if (answer.choice) {
+                return GameLoop(currentSave);
+            }
+            else {
+                return CheckInventory(playerData, currentSave);
+            }
+          });
+          }
+}
+
 }
 
 
